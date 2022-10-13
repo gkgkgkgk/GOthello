@@ -117,6 +117,8 @@ func gameLoop(){
 		}
 	}
 
+	noTurn := false
+
 	for !gameOver {
 		printBoard()
 		fmt.Printf("It is Player %d's turn.\n", turn)
@@ -127,7 +129,12 @@ func gameLoop(){
 			fmt.Printf("\nPlayer %d placed a piece on %s.\n", turn, convertIntToCoords(legalMoves[playerMove]))
 			placePiece(legalMoves[playerMove])
 		} else {
-			fmt.Printf("\nPlayer %d has no moves.\n", turn)
+			if noTurn {
+				gameOver = true
+			} else {
+				fmt.Printf("\nPlayer %d has no moves.\n", turn)
+				noTurn = true
+			}
 		}
 
 		if turn == 1 {
@@ -136,4 +143,6 @@ func gameLoop(){
 			turn = 1
 		}
 	}
+
+	fmt.Println("GAME OVER")
 }
