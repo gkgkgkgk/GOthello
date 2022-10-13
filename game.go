@@ -8,91 +8,100 @@ import (
 )
 
 func beginGame(){
-	reader := bufio.NewReader(os.Stdin)
-
+	color.Unset()
+	gameOver = false
 	fmt.Println("Welcome to Othello.")
-	fmt.Println("")
-	fmt.Print("Is ")
-	color.Set(color.FgBlack)
-	color.Set(color.BgGreen)
-	fmt.Print("Player 1 (black pieces)")
-	color.Unset()
+	if defaultSettings {
+		fmt.Println("Beginning game with default settings.")
+		p1 = 0
+		p2 = 1
+		timeLimit = 5
+		turn = 1
+	} else {
+		reader := bufio.NewReader(os.Stdin)
 
-	fmt.Println(" a human (h) or AI (a)?")
-	color.Unset()
-	
-	for {
-		p1str, _ := reader.ReadString('\n')
+		fmt.Println("")
+		fmt.Print("Is ")
+		color.Set(color.FgBlack)
+		color.Set(color.BgGreen)
+		fmt.Print("Player 1 (black pieces)")
+		color.Unset()
 
-		if p1str[0:1] == "h" || p1str[0:1] == "a" {
-			if p1str[0:1] == "h"{
-				p1 = 0
-			} else {
-				p1 = 1
+		fmt.Println(" a human (h) or AI (a)?")
+		color.Unset()
+		
+		for {
+			p1str, _ := reader.ReadString('\n')
+
+			if p1str[0:1] == "h" || p1str[0:1] == "a" {
+				if p1str[0:1] == "h"{
+					p1 = 0
+				} else {
+					p1 = 1
+				}
+				break
 			}
-			break
+
+			color.Set(color.FgRed)
+			fmt.Println("Please type an 'h' for human or an 'a' for AI.")
+			color.Unset()
 		}
 
-		color.Set(color.FgRed)
-		fmt.Println("Please type an 'h' for human or an 'a' for AI.")
+		
+
+		fmt.Print("Is ")
+		color.Set(color.FgWhite)
+		color.Set(color.BgGreen)
+		fmt.Print("Player 2 (white pieces)")
 		color.Unset()
-	}
 
-	
+		fmt.Println(" a human (h) or AI (a)?")
+		color.Unset()
+		for {
+			p2str, _ := reader.ReadString('\n')
 
-	fmt.Print("Is ")
-	color.Set(color.FgWhite)
-	color.Set(color.BgGreen)
-	fmt.Print("Player 2 (white pieces)")
-	color.Unset()
-
-	
-	fmt.Println(" a human (h) or AI (a)?")
-	color.Unset()
-	for {
-		p2str, _ := reader.ReadString('\n')
-
-		if p2str[0:1] == "h" || p2str[0:1] == "a" {
-			if p2str[0:1] == "h"{
-				p2 = 0
-			} else {
-				p2 = 1
+			if p2str[0:1] == "h" || p2str[0:1] == "a" {
+				if p2str[0:1] == "h"{
+					p2 = 0
+				} else {
+					p2 = 1
+				}
+				break
 			}
-			break
-		}
 
-		color.Set(color.FgRed)
-		fmt.Println("Please type an 'h' for human or an 'a' for AI.")
-		color.Unset()
-	}
-
-	fmt.Println("What is the AI time limit (in seconds) for each turn?")
-	
-	for {
-		timeStr, err := reader.ReadString('\n')	
-		timeLimit, err = convertStringToInt(timeStr)
-
-		if err != nil {
 			color.Set(color.FgRed)
-			fmt.Println("Please input a valid number.")
-		} else {
-			break
+			fmt.Println("Please type an 'h' for human or an 'a' for AI.")
+			color.Unset()
 		}
-		color.Unset()
-	}
 
-	fmt.Println("Which player will make the first move?")
-	for {
-		turnStr, err := reader.ReadString('\n')	
-		turn, err = convertStringToInt(turnStr)
+		fmt.Println("What is the AI time limit (in seconds) for each turn?")
+		
+		for {
+			timeStr, err := reader.ReadString('\n')	
+			timeLimit, err = convertStringToInt(timeStr)
 
-		if err != nil || (turn != 1 && turn != 2 ){
-			color.Set(color.FgRed)
-			fmt.Println("Please input a a 1 or 2.")
-		} else {
-			break
+			if err != nil {
+				color.Set(color.FgRed)
+				fmt.Println("Please input a valid number.")
+			} else {
+				break
+			}
+			color.Unset()
 		}
-		color.Unset()
+
+		fmt.Println("Which player will make the first move?")
+		for {
+			turnStr, err := reader.ReadString('\n')	
+			turn, err = convertStringToInt(turnStr)
+
+			if err != nil || (turn != 1 && turn != 2 ){
+				color.Set(color.FgRed)
+				fmt.Println("Please input a a 1 or 2.")
+			} else {
+				break
+			}
+			color.Unset()
+		}
 	}
 
 	fmt.Print("\nThe game will begin with Player 1 as a")
@@ -113,6 +122,7 @@ func beginGame(){
 	fmt.Println(".")
 	
 	fmt.Printf("Player %d will go first and the AI time limit is %d seconds.\nGood Luck!\n\n", turn, timeLimit)
+	color.Unset()
 }
 
 func gameLoop(){
@@ -125,6 +135,16 @@ func gameLoop(){
 		}
 	}
 
-	printBoard()
-	getAllLegalMoves(turn)
+	for !gameOver {
+		printBoard()
+		getAllLegalMoves(turn)
+		playTurn()
+	}
+}
+
+func playTurn () {
+	reader := bufio.NewReader(os.Stdin)
+	turnStr, _ := reader.ReadString('\n')
+
+	print(turnStr)
 }

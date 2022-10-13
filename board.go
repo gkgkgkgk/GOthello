@@ -57,7 +57,7 @@ func convertStringToInt(str string) (int, error) {
 }
 
 func printBoard(){
-	color.Set(color.FgBlue)
+	color.Set(color.FgCyan)
 	fmt.Printf("It is Player %d's turn.\n", turn)
 	color.Unset()
 	fmt.Print("   ")
@@ -65,7 +65,7 @@ func printBoard(){
 		fmt.Print(i)
 		fmt.Print("     ")
 	}
-	fmt.Println("")
+	fmt.Print("\n")
 
 	for row := 0; row < 8; row++ {
 		color.Set(color.BgGreen)
@@ -73,12 +73,13 @@ func printBoard(){
 		for i:=0; i < 49; i++{
 			fmt.Print("-")
 		}
-		fmt.Println("")
+		fmt.Print("\n")
+
 		for i:=0; i < 2; i++ {
 			color.Set(color.BgGreen)
 			color.Set(color.FgBlack)
-
 			fmt.Print("|")
+			color.Unset()
 			for column:=0; column < 8; column++{
 				if board[row][column] == 0 {
 					color.Set(color.BgGreen)
@@ -93,12 +94,11 @@ func printBoard(){
 				color.Set(color.FgBlack)
 				fmt.Print("|")
 				color.Unset()
-
 			}
 			if i == 0 {
 				fmt.Printf(" %d", row)
 			}
-			fmt.Println("")
+			fmt.Print("\n")
 		}
 	}
 	color.Set(color.BgGreen)
@@ -107,6 +107,6 @@ func printBoard(){
 	for i:=0; i < 49; i++{
 		fmt.Print("-")
 	}
-	fmt.Println("")
+	fmt.Print("\n")
 	color.Unset()
 }
