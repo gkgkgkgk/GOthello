@@ -4,8 +4,7 @@ import (
 	"fmt"
 )
 
-func getAllLegalMoves(player int){
-	var legalMoves []int
+func getAllLegalMoves(player int) (legalMoves []int) {
 	for row := 0; row < 8; row++{
 		for column := 0; column < 8; column++{
 			if isLegalMove(player, row, column){
@@ -13,9 +12,9 @@ func getAllLegalMoves(player int){
 			}
 		}
 	}
-
-	fmt.Printf("Found %d legal moves.", len(legalMoves))
-	fmt.Printf("%v", legalMoves)
+	fmt.Printf("Found %d legal moves.\n", len(legalMoves))
+	fmt.Printf("%v\n", legalMoves)
+	return
 }
 
 func isLegalMove(player int, row int, column int) bool{
