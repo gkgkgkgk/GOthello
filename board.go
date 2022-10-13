@@ -6,12 +6,10 @@ import (
 	"strings"
 	"io/ioutil"
 	"log"
-	"strconv"
-	"regexp"
 )
 
 // 0 is empty, 1 is black, 2 is white
-// the board is addressed as board[row_number (y coordinate)][column_number (x coordinate)]
+// the board is addressed as board[row_number (y coordinate)][col_number (x coordinate)]
 var board [8][8]int
 
 func initializeBoard(){
@@ -45,21 +43,7 @@ func loadGame(filename string){
 	timeLimit, _ = convertStringToInt(lines[9])
 }
 
-func convertStringToInt(str string) (int, error) {
-	nonAlphanumericRegex := regexp.MustCompile(`[^a-zA-Z0-9 ]+`)
-	num, err := strconv.Atoi(nonAlphanumericRegex.ReplaceAllString(str, ""))
-	
-	if err != nil{
-		return -1, err
-	}
-	
-	return num, nil
-}
-
 func printBoard(){
-	color.Set(color.FgCyan)
-	fmt.Printf("It is Player %d's turn.\n", turn)
-	color.Unset()
 	fmt.Print("   ")
 	for i:=0; i < 8; i++{
 		fmt.Print(i)
@@ -67,33 +51,28 @@ func printBoard(){
 	}
 	fmt.Print("\n")
 
+	line := ""
+	for i:=0; i < 49; i++{
+		line += "-"
+	}
+
 	for row := 0; row < 8; row++ {
-		color.Set(color.BgGreen)
-		color.Set(color.FgBlack)
-		for i:=0; i < 49; i++{
-			fmt.Print("-")
-		}
+		
+		colorPrint(line, color.BgGreen, color.FgBlack)
 		fmt.Print("\n")
 
 		for i:=0; i < 2; i++ {
-			color.Set(color.BgGreen)
-			color.Set(color.FgBlack)
-			fmt.Print("|")
-			color.Unset()
-			for column:=0; column < 8; column++{
-				if board[row][column] == 0 {
-					color.Set(color.BgGreen)
-				} else if board[row][column] == 1 {
-					color.Set(color.BgBlack)
-				} else {
-					color.Set(color.BgWhite)
+			colorPrint("|", color.BgGreen, color.FgBlack)
+
+			for col:=0; col < 8; col++{
+				squareColor := color.BgWhite
+				if board[row][col] == 0 {
+					squareColor = color.BgGreen
+				} else if board[row][col] == 1 {
+					squareColor = color.BgBlack
 				}
-				fmt.Print("     ")
-				color.Unset()
-				color.Set(color.BgGreen)
-				color.Set(color.FgBlack)
-				fmt.Print("|")
-				color.Unset()
+				colorPrint("     ", color.FgBlack, squareColor)
+				colorPrint("|", color.BgGreen, color.FgBlack)
 			}
 			if i == 0 {
 				fmt.Printf(" %d", row)
@@ -101,12 +80,354 @@ func printBoard(){
 			fmt.Print("\n")
 		}
 	}
-	color.Set(color.BgGreen)
-	color.Set(color.FgBlack)
 
-	for i:=0; i < 49; i++{
-		fmt.Print("-")
-	}
+	colorPrint(line, color.BgGreen, color.FgBlack)
 	fmt.Print("\n")
-	color.Unset()
+}
+
+func getAllLegalMoves(player int) (legalMoves []int) {
+	for row := 0; row < 8; row++{
+		for col := 0; col < 8; col++{
+			if isLegalMove(player, row, col){
+				legalMoves = append(legalMoves, row * 8 + col)
+			}
+		}
+	}
+
+	return
+}
+
+func isLegalMove(player int, row int, col int) bool{
+	opponent := 0
+
+	if player == 1 {
+		opponent = 2
+	} else {
+		opponent = 1
+	}
+
+	if board[row][col] == 0 {
+		nw, n, ne, w, e, sw, s, se := -1,-1,-1,-1,-1,-1,-1,-1
+
+		if row != 0 {
+			n = board[row - 1][col]
+
+			if col != 0 {
+				nw = board[row - 1][col - 1]
+			}
+			
+			if col != 7 {
+				ne = board[row - 1][col + 1]
+			}
+		}
+		
+		if row != 7 {
+			s = board[row + 1][col]
+
+			if col != 0 {
+				sw = board[row + 1][col - 1]
+			}
+			
+			if col != 7 {
+				se = board[row + 1][col + 1]
+			}
+		}
+		
+		if col != 0 {
+			w = board[row][col - 1]
+		}
+		
+		if col != 7 {
+			e = board[row][col + 1]
+		}
+		
+
+		if nw != opponent && n != opponent && ne != opponent && w != opponent && e != opponent && sw != opponent && s != opponent && se != opponent{
+			return false
+		}
+
+		if nw == opponent {
+			for d := 2; col - d >= 0 && row - d >= 0; d++ {
+				nextPiece := board[row - d][col - d]
+				if nextPiece == 0 {
+					break
+				}
+
+				if nextPiece == player {
+					return true
+				}
+			}
+		}
+
+		if n == opponent {
+			for d := 2; row - d >= 0; d++ {
+				nextPiece := board[row - d][col]
+				if nextPiece == 0 {
+					break
+				}
+
+				if nextPiece == player {
+					return true
+				}
+			}
+		}
+
+		if ne == opponent {
+			for d := 2; col + d <= 0 && row - d >= 0; d++ {
+				nextPiece := board[row - d][col + d]
+				if nextPiece == 0 {
+					break
+				}
+
+				if nextPiece == player {
+					return true
+				}
+			}
+		}
+
+		if w == opponent {
+			for d := 2; col - d >= 0; d++ {
+				nextPiece := board[row][col - d]
+				if nextPiece == 0 {
+					break
+				}
+
+				if nextPiece == player {
+					return true
+				}
+			}
+		}
+
+		if e == opponent {
+			for d := 2; col + d <= 7; d++ {
+				nextPiece := board[row][col + d]
+				if nextPiece == 0 {
+					break
+				}
+
+				if nextPiece == player {
+					return true
+				}
+			}
+		}
+
+		if sw == opponent {
+			for d := 2; col - d >= 0 && row + d <= 7; d++ {
+				nextPiece := board[row + d][col - d]
+				if nextPiece == 0 {
+					break
+				}
+
+				if nextPiece == player {
+					return true
+				}
+			}
+		}
+
+		if s == opponent {
+			for d := 2; row + d <= 7; d++ {
+				nextPiece := board[row + d][col]
+				if nextPiece == 0 {
+					break
+				}
+
+				if nextPiece == player {
+					return true
+				}
+			}
+		}
+
+		if se == opponent {
+			for d := 2; col + d <= 7 && row + d <= 7; d++ {
+				nextPiece := board[row + d][col + d]
+				if nextPiece == 0 {
+					break
+				}
+
+				if nextPiece == player {
+					return true
+				}
+			}
+		}
+
+		return false
+	} else {
+		return false
+	}
+}
+
+func placePiece(pos int){
+	row := (int)(pos / 8)
+	col := pos % 8
+	board[row][col] = turn
+	
+	opponent := 0
+
+	if turn == 1 {
+		opponent = 2
+	} else {
+		opponent = 1
+	}
+
+	nw, n, ne, w, e, sw, s, se := -1,-1,-1,-1,-1,-1,-1,-1
+
+	if row != 0 {
+		n = board[row - 1][col]
+
+		if col != 0 {
+			nw = board[row - 1][col - 1]
+		}
+		
+		if col != 7 {
+			ne = board[row - 1][col + 1]
+		}
+	}
+	
+	if row != 7 {
+		s = board[row + 1][col]
+
+		if col != 0 {
+			sw = board[row + 1][col - 1]
+		}
+		
+		if col != 7 {
+			se = board[row + 1][col + 1]
+		}
+	}
+	
+	if col != 0 {
+		w = board[row][col - 1]
+	}
+	
+	if col != 7 {
+		e = board[row][col + 1]
+	}
+
+	if nw == opponent {
+		for d := 2; col - d >= 0 && row - d >= 0; d++ {
+			nextPiece := board[row - d][col - d]
+			if nextPiece == 0 {
+				break
+			}
+
+			if nextPiece == turn {
+				for d_flip := 1; d_flip < d; d_flip++ {
+					board[row - d_flip][col - d_flip] = turn
+				} 
+				break
+			}
+		}
+	}
+
+	if n == opponent {
+		for d := 2; row - d >= 0; d++ {
+			nextPiece := board[row - d][col]
+			if nextPiece == 0 {
+				break
+			}
+
+			if nextPiece == turn {
+				for d_flip := 1; d_flip < d; d_flip++ {
+					board[row - d_flip][col] = turn
+				} 
+				break
+			}
+		}
+	}
+
+	if ne == opponent {
+		for d := 2; col + d <= 0 && row - d >= 0; d++ {
+			nextPiece := board[row - d][col + d]
+			if nextPiece == 0 {
+				break
+			}
+
+			if nextPiece == turn {
+				for d_flip := 1; d_flip < d; d_flip++ {
+					board[row - d_flip][col + d_flip] = turn
+				} 
+				break
+			}
+		}
+	}
+
+	if w == opponent {
+		for d := 2; col - d >= 0; d++ {
+			nextPiece := board[row][col - d]
+			if nextPiece == 0 {
+				break
+			}
+
+			if nextPiece == turn {
+				for d_flip := 1; d_flip < d; d_flip++ {
+					board[row][col - d_flip] = turn
+				} 
+				break
+			}
+		}
+	}
+
+	if e == opponent {
+		for d := 2; col + d <= 7; d++ {
+			nextPiece := board[row][col + d]
+			if nextPiece == 0 {
+				break
+			}
+
+			if nextPiece == turn {
+				for d_flip := 1; d_flip < d; d_flip++ {
+					board[row][col + d_flip] = turn
+				} 
+				break
+			}
+		}
+	}
+
+	if sw == opponent {
+		for d := 2; col - d >= 0 && row + d <= 7; d++ {
+			nextPiece := board[row + d][col - d]
+			if nextPiece == 0 {
+				break
+			}
+
+			if nextPiece == turn {
+				for d_flip := 1; d_flip < d; d_flip++ {
+					board[row + d_flip][col - d_flip] = turn
+				} 
+				break
+			}
+		}
+	}
+
+	if s == opponent {
+		for d := 2; row + d <= 7; d++ {
+			nextPiece := board[row + d][col]
+			if nextPiece == 0 {
+				break
+			}
+
+			if nextPiece == turn {
+				for d_flip := 1; d_flip < d; d_flip++ {
+					board[row + d_flip][col] = turn
+				} 
+				break
+			}
+		}
+	}
+
+	if se == opponent {
+		for d := 2; col + d <= 7 && row + d <= 7; d++ {
+			nextPiece := board[row + d][col + d]
+			if nextPiece == 0 {
+				break
+			}
+
+			if nextPiece == turn {
+				for d_flip := 1; d_flip < d; d_flip++ {
+					board[row + d_flip][col + d_flip] = turn
+				} 
+				break
+			}
+		}
+	}
 }
