@@ -145,4 +145,28 @@ func gameLoop(){
 	}
 
 	fmt.Println("GAME OVER")
+	checkWinner()
+}
+
+func checkWinner(){
+	p1Score := 0
+	p2Score := 0
+
+	for i := 0; i < 8; i++{
+		for j := 0; j < 8; j++ {
+			if board[i][j] == 1 {
+				p1Score++
+			} else {
+				p2Score++
+			}
+		}
+	}
+
+	if p1Score > p2Score {
+		fmt.Printf("Player 1 won the game %d to %d.\n", p1Score, p2Score)
+	} else if p2Score > p1Score{
+		fmt.Printf("Player 2 won the game %d to %d.\n", p2Score, p1Score)
+	} else {
+		fmt.Printf("The game ended in a tie %d to %d.\n", p1Score, p2Score)
+	}
 }
