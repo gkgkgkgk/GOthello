@@ -120,6 +120,7 @@ func gameLoop(){
 	noTurn := false
 
 	for !gameOver {
+		saveGame()
 		printBoard()
 		fmt.Printf("It is Player %d's turn.\n", turn)
 		legalMoves := getAllLegalMoves(turn)

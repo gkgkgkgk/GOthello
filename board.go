@@ -6,6 +6,7 @@ import (
 	"strings"
 	"io/ioutil"
 	"log"
+	"os"
 )
 
 // 0 is empty, 1 is black, 2 is white
@@ -41,6 +42,30 @@ func loadGame(filename string){
 
 	turn, _ = convertStringToInt(lines[8])
 	timeLimit, _ = convertStringToInt(lines[9])
+}
+
+func saveGame(){
+	f, err := os.Create("./saves/autosave.txt")
+
+	if err != nil {
+        log.Fatalf("unable to write file: %v", err)
+    }
+
+	defer f.Close()
+
+	for i := 0; i < 8; i++{
+		line := ""
+		for j := 0; j < 8; j++ {
+			line += fmt.Sprintf("%d", board[i][j])
+			if j != 7 {
+				line += " "
+			}
+		}
+
+		f.WriteString(line + "\n")
+	}
+
+	f.WriteString(fmt.Sprintf("%d\n%d", turn, timeLimit))
 }
 
 func printBoard(){

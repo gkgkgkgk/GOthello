@@ -18,7 +18,6 @@ var gameOver bool
 func main(){
     flag.StringVar(&loadpath, "savedpath", "", "The path to a save file from which to load a game.")
 	flag.BoolVar(&defaultSettings, "default", false, "Load default settings: Human player 1, AI player 2, 5 second time limit, game begins with player 1.")
-
 	flag.Parse()
 
 	beginGame()
