@@ -26,3 +26,19 @@ func colorPrint(text string, c1 color.Attribute, c2 color.Attribute){
 	c := color.New(c1).Add(c2)
 	c.Print(text)
 }
+
+func maximum(a int, b int) int {
+	if a >= b {
+		return a
+	} 
+	
+	return b
+}
+
+func minimum(a int, b int) int {
+	if a <= b {
+		return a
+	} 
+	
+	return b
+}

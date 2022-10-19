@@ -27,6 +27,6 @@ func getPlayerDecision (legalMoves []int) int{
 			color.Red("Please enter a valid move.")
 		}
 	} else { // if it is an AI's turn
-		return 0
+		return getAITurn(legalMoves)
 	}
 }

@@ -123,7 +123,7 @@ func gameLoop(){
 		saveGame()
 		printBoard()
 		fmt.Printf("It is Player %d's turn.\n", turn)
-		legalMoves := getAllLegalMoves(turn)
+		legalMoves := getAllLegalMoves(turn, board)
 
 		if len(legalMoves) > 0 {
 		playerMove := getPlayerDecision(legalMoves)

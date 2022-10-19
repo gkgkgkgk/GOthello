@@ -110,7 +110,7 @@ func printBoard(){
 	fmt.Print("\n")
 }
 
-func getAllLegalMoves(player int) (legalMoves []int) {
+func getAllLegalMoves(player int, board[8][8] int) (legalMoves []int) {
 	for row := 0; row < 8; row++{
 		for col := 0; col < 8; col++{
 			if isLegalMove(player, row, col){
