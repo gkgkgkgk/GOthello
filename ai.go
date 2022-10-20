@@ -4,9 +4,14 @@ import (
 	"fmt"
 	"time"
 	"math"
+	"math/rand"
 )
 
 func getAITurn(board[8][8] int, legalMoves []int, turn int, timeLimit int) int{
+	if len(legalMoves) == 1 { // if there is only one avaailable move
+		return legalMoves[0]
+	}
+	
 	var scores []int
 	branchTime := timeLimit / len(legalMoves) 
 
@@ -17,23 +22,46 @@ func getAITurn(board[8][8] int, legalMoves []int, turn int, timeLimit int) int{
 		score := alphaBeta(tmpBoard, int(math.Inf(-1)), int(math.Inf(1)), 1, false, turn)
 		scores = append(scores, score)
 		fmt.Printf("%f %f", time.Since(start).Seconds(), branchTime)
-	} 
+	}
 
-	return 0
+	bestScore := int(math.Inf(-1))
+	for _, element := range scores {
+		if element > bestScore {
+			bestScore = element
+		}
+	}
+
+	var indices []int
+	for i, element := range scores {
+		if element == bestScore {
+			indices = append(indices, i)
+		}
+	}
+
+	if len(indices) == 1 {
+		return indices[0]
+	} 
+	
+	return indices[rand.Intn(len(indices))]
 }
 
-func alphaBeta(board[8][8] int, alpha int, beta int, depth int, maxPlayer bool, color int) int{
-	if maxPlayer {
+func alphaBeta(board[8][8] int, maxDepth int, turn int) int{
+	return maxScore(board, int(math.Inf(-1)), int(math.Inf(1)), maxDepth)
+}
 
-	} else {
+func maxScore(board[8][8] int, alpha int, beta int, depth int, turn int) int{
+	legalMoves := getAllLegalMoves(turn, board)
+	v := math.Inf(-1)
 
+	for i, element := range legalMoves {
+		tmpBoard := placePiece(board, element, turn)
 	}
 	
 	return 0
 }
 
-func maxScore(board[8][8] int, alpha int, beta int, depth int, color int){
-
+func minScore(board[8][8] int, alpha int, beta int, depth int, color int) int{
+	return 0
 }
 
 // given a board and a player, return a heuristic score for the player
