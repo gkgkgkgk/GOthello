@@ -133,7 +133,7 @@ func gameLoop(p1 int, p2 int, turn int, timeLimit int){
 		legalMoves := getAllLegalMoves(turn, board)
 
 		if len(legalMoves) > 0 {
-			playerMove := getPlayerDecision(legalMoves, turn, p1, p2)
+			playerMove := getPlayerDecision(board, legalMoves, turn, p1, p2, timeLimit)
 			fmt.Printf("\nPlayer %d placed a piece on %s.\n", turn, convertIntToCoords(legalMoves[playerMove]))
 			board = placePiece(board, legalMoves[playerMove], turn)
 		} else {
