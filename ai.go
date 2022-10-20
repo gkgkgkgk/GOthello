@@ -7,18 +7,18 @@ import (
 )
 
 func getAITurn(board[8][8] int, legalMoves []int, turn int, timeLimit int) int{
-	start := time.Now()
 	var scores []int
-	branchTime = timeLimit
+	branchTime := timeLimit / len(legalMoves) 
 
 	for i := range legalMoves {
+		start := time.Now()
 		tmpBoard := placePiece(board, legalMoves[i], turn)
 
 		score := alphaBeta(tmpBoard, int(math.Inf(-1)), int(math.Inf(1)), 1, false, turn)
 		scores = append(scores, score)
+		fmt.Printf("%f %f", time.Since(start).Seconds(), branchTime)
 	} 
 
-	fmt.Printf("%f", time.Since(start).Seconds())
 	return 0
 }
 
