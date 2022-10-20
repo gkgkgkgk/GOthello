@@ -7,17 +7,19 @@ import (
 	"os"
 )
 
-func beginGame(){
+func beginGame() (int, int, int, int){
+	gameOver = false
+	p1 := 0
+	p2 := 1
+	timeLimit := 5
+	turn := 1
+
 	color.Set(color.FgWhite)
 	color.Set(color.BgBlack)
-	gameOver = false
 	fmt.Println("Welcome to Othello.")
+
 	if defaultSettings {
 		fmt.Println("Beginning game with default settings.")
-		p1 = 0
-		p2 = 1
-		timeLimit = 5
-		turn = 1
 	} else {
 		reader := bufio.NewReader(os.Stdin)
 
@@ -105,30 +107,35 @@ func beginGame(){
 	
 	fmt.Printf("Player %d will go first and the AI time limit is %d seconds.\nGood Luck!\n\n", turn, timeLimit)
 	color.Unset()
+
+	return p1, p2, turn, timeLimit
 }
 
-func gameLoop(){
-	initializeBoard()
+func gameLoop(p1 int, p2 int, turn int, timeLimit int){
+	board := initializeBoard()
+	noTurn := false
+
 	if loadpath != "" {
 		if loadpath == "autosave" {
-			loadGame("./saves/autosave.txt")
+			board, turn, timeLimit = loadGame("./saves/autosave.txt")
 		} else {
-			loadGame(loadpath)
+			board, turn, timeLimit = loadGame(loadpath)
 		}
 	}
 
-	noTurn := false
 
+	// Begin game loop
 	for !gameOver {
-		saveGame()
-		printBoard()
+		saveGame(board, turn, timeLimit)
+		printBoard(board)
+
 		fmt.Printf("It is Player %d's turn.\n", turn)
 		legalMoves := getAllLegalMoves(turn, board)
 
 		if len(legalMoves) > 0 {
-		playerMove := getPlayerDecision(legalMoves)
+			playerMove := getPlayerDecision(legalMoves, turn, p1, p2)
 			fmt.Printf("\nPlayer %d placed a piece on %s.\n", turn, convertIntToCoords(legalMoves[playerMove]))
-			placePiece(legalMoves[playerMove])
+			board = placePiece(board, legalMoves[playerMove], turn)
 		} else {
 			if noTurn {
 				gameOver = true
@@ -146,10 +153,10 @@ func gameLoop(){
 	}
 
 	fmt.Println("GAME OVER")
-	checkWinner()
+	checkWinner(board)
 }
 
-func checkWinner(){
+func checkWinner(board [8][8] int){
 	p1Score := 0
 	p2Score := 0
 

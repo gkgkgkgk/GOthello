@@ -8,7 +8,7 @@ import (
 )
 
 // returns the index of the player's decision
-func getPlayerDecision (legalMoves []int) int{
+func getPlayerDecision (legalMoves []int, turn int, p1 int, p2 int) int{
 	if (turn == 1 && p1 == 0) || (turn == 2 && p2 == 0){ // if it is a real player's turn
 		fmt.Println("Select a turn below by typing in a number.")
 		for index, element := range legalMoves {

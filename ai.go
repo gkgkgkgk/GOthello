@@ -13,11 +13,17 @@ func getAITurn(legalMoves []int) int{
 	return 0
 }
 
-func alphaBeta(alpha int, beta int, depth int, board[8][8] int, maxPlayer bool) int{
-	heuristic := calculateHeuristic()
+func alphaBeta(alpha int, beta int, depth int, board[8][8] int, maxPlayer bool, turn int) int{
+	heuristic := calculateHeuristic(board, turn)
 
-	if depth == 0 || isTerminalNode(board){
+	if depth == 0 || isTerminalNode(board, turn){
 		return heuristic
+	}
+
+	if turn == 1 {
+		turn = 2
+	} else {
+		turn = 1
 	}
 
 	if maxPlayer {
@@ -25,7 +31,7 @@ func alphaBeta(alpha int, beta int, depth int, board[8][8] int, maxPlayer bool) 
 		childrenNodes := getChildrenNodes(board)
 
 		for i := 0; i < len(childrenNodes); i++{
-			value := maximum(value, alphaBeta(alpha, beta, depth -1, childrenNodes[i], false))
+			value := maximum(value, alphaBeta(alpha, beta, depth -1, childrenNodes[i], false, turn))
 			if value >= beta {
 				break
 			}
@@ -39,7 +45,7 @@ func alphaBeta(alpha int, beta int, depth int, board[8][8] int, maxPlayer bool) 
 		childrenNodes := getChildrenNodes(board)
 
 		for i := 0; i < len(childrenNodes); i++{
-			value := minimum(value, alphaBeta(alpha, beta, depth -1, childrenNodes[i], true))
+			value := minimum(value, alphaBeta(alpha, beta, depth -1, childrenNodes[i], true,  turn))
 			if value <= alpha {
 				break
 			}
@@ -58,7 +64,7 @@ func getChildrenNodes(board[8][8] int) [][8][8] int {
 	return children
 }
 
-func isTerminalNode(board[8][8] int) bool{
+func isTerminalNode(board[8][8] int, turn int) bool{
 	if len(getAllLegalMoves(turn, board)) == 0{
 		return true
 	}
@@ -66,13 +72,35 @@ func isTerminalNode(board[8][8] int) bool{
 	return true
 }
 
-func calculateHeuristic() int{
+func calculateHeuristic(board [8][8] int, player int) int{
 	score := 0
 	for i := 0; i < 8; i++ {
 		for j := 0; j < 8; j++ {
-			if board[i][j] == turn {
+			if board[i][j] == player {
 				score++
 			} 
+		}
+	}
+
+	if board[0][0] == player {
+		score += 100
+	}
+
+	if board[0][7] == player {
+		score += 100
+	}
+
+	if board[7][7] == player {
+		score += 100
+	}
+
+	if board[7][0] == player {
+		score += 100
+	}
+
+	for i := 0; i < 8; i++{
+		if board[i][0] == player {
+			score += 100
 		}
 	}
 

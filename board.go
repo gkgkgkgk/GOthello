@@ -11,10 +11,8 @@ import (
 
 // 0 is empty, 1 is black, 2 is white
 // the board is addressed as board[row_number (y coordinate)][col_number (x coordinate)]
-var board [8][8]int
-
-func initializeBoard(){
-	board = [8][8]int{
+func initializeBoard() [8][8]int {
+	return [8][8]int{
 		{0, 0, 0, 0, 0, 0, 0, 0},
 		{0, 0, 0, 0, 0, 0, 0, 0},
 		{0, 0, 0, 0, 0, 0, 0, 0},
@@ -25,8 +23,9 @@ func initializeBoard(){
 		{0, 0, 0, 0, 0, 0, 0, 0}}
 }
 
-func loadGame(filename string){
+func loadGame(filename string) ([8][8]int, int, int){
 	data, err := ioutil.ReadFile(filename)
+	var board [8][8]int
 
 	if err != nil {
         log.Fatalf("unable to read file: %v", err)
@@ -40,11 +39,13 @@ func loadGame(filename string){
 		}
 	}
 
-	turn, _ = convertStringToInt(lines[8])
-	timeLimit, _ = convertStringToInt(lines[9])
+	turn, _ := convertStringToInt(lines[8])
+	timeLimit, _ := convertStringToInt(lines[9])
+
+	return board, turn, timeLimit
 }
 
-func saveGame(){
+func saveGame(board [8][8] int, turn int, timeLimit int){
 	f, err := os.Create("./saves/autosave.txt")
 
 	if err != nil {
@@ -68,7 +69,7 @@ func saveGame(){
 	f.WriteString(fmt.Sprintf("%d\n%d", turn, timeLimit))
 }
 
-func printBoard(){
+func printBoard(board [8][8] int){
 	fmt.Print("   ")
 	for i:=0; i < 8; i++{
 		fmt.Print(i)
@@ -113,7 +114,7 @@ func printBoard(){
 func getAllLegalMoves(player int, board[8][8] int) (legalMoves []int) {
 	for row := 0; row < 8; row++{
 		for col := 0; col < 8; col++{
-			if isLegalMove(player, row, col){
+			if isLegalMove(board, player, row, col){
 				legalMoves = append(legalMoves, row * 8 + col)
 			}
 		}
@@ -122,7 +123,7 @@ func getAllLegalMoves(player int, board[8][8] int) (legalMoves []int) {
 	return
 }
 
-func isLegalMove(player int, row int, col int) bool{
+func isLegalMove(board [8][8] int, player int, row int, col int) bool{
 	opponent := 0
 
 	if player == 1 {
@@ -281,7 +282,7 @@ func isLegalMove(player int, row int, col int) bool{
 	}
 }
 
-func placePiece(pos int){
+func placePiece(board [8][8] int, pos int, turn int) [8][8] int{
 	row := (int)(pos / 8)
 	col := pos % 8
 	board[row][col] = turn
@@ -455,4 +456,6 @@ func placePiece(pos int){
 			}
 		}
 	}
+
+	return board
 }
