@@ -4,110 +4,184 @@ import (
 	"fmt"
 	"time"
 	"math"
-	"math/rand"
 )
 
 func getAITurn(board[8][8] int, legalMoves []int, turn int, timeLimit int) int{
+	start := time.Now()
+
 	if len(legalMoves) == 1 { // if there is only one avaailable move
-		return legalMoves[0]
+		return 0
 	}
 	
-	var scores []int
-	branchTime := timeLimit / len(legalMoves) 
+	bestMove := 0
+	depth := 1
 
-	for i := range legalMoves {
-		start := time.Now()
-		tmpBoard := placePiece(board, legalMoves[i], turn)
+	fmt.Printf("checking %d different turns\n", len(legalMoves))
 
-		score := alphaBeta(tmpBoard, int(math.Inf(-1)), int(math.Inf(1)), 1, false, turn)
-		scores = append(scores, score)
-		fmt.Printf("%f %f", time.Since(start).Seconds(), branchTime)
-	}
-
-	bestScore := int(math.Inf(-1))
-	for _, element := range scores {
-		if element > bestScore {
-			bestScore = element
+	for {
+		// fmt.Printf("depth: %d\n", depth)
+		if time.Since(start).Seconds() > float64(timeLimit) {
+			break
 		}
-	}
 
-	var indices []int
-	for i, element := range scores {
-		if element == bestScore {
-			indices = append(indices, i)
+		value := math.MinInt
+		// fmt.Printf("Depth: %d, found %d moves\n", depth, len(legalMoves))
+
+		for i, move := range legalMoves {
+			fmt.Printf("Placing move on board: %d\n", move)
+			tmpBoard := placePiece(board, move, turn)
+			tmpTurn := turn
+
+			if turn == 1 {
+				tmpTurn = 2
+			} else {
+				tmpTurn = 1
+			}
+
+			score := alphaBeta(tmpBoard, math.MinInt, math.MaxInt, depth, tmpTurn, turn)
+			fmt.Printf("Score: %d\n", score)
+
+			if score > value {
+				value = score
+				bestMove = i
+			}
 		}
+
+		depth++
 	}
 
-	if len(indices) == 1 {
-		return indices[0]
-	} 
 	
-	return indices[rand.Intn(len(indices))]
+	return bestMove
 }
 
-func alphaBeta(board[8][8] int, maxDepth int, turn int) int{
-	return maxScore(board, int(math.Inf(-1)), int(math.Inf(1)), maxDepth)
+func alphaBeta(board[8][8] int, alpha int, beta int, depth int, turn int, maxTurn int) int{
+	// check here for terminal state
+	if depth == 0 { // also check time
+		// fmt.Printf("depth: %d alpha: %d beta: %d\n", depth, alpha, beta)
+		return calculateHeuristicScore(board, turn)
+	}
+
+	if turn == maxTurn {
+		return maxScore(board, alpha, beta, depth, turn, maxTurn)
+
+	} else {
+		return minScore(board, alpha, beta, depth, turn, maxTurn)
+	}
 }
 
-func maxScore(board[8][8] int, alpha int, beta int, depth int, turn int) int{
+// of course, this is a thing: https://github.com/golang/go/issues/20517
+func maxScore(board[8][8] int, alpha int, beta int, depth int, turn int, maxTurn int) int{
+	v := math.MinInt
 	legalMoves := getAllLegalMoves(turn, board)
-	v := math.Inf(-1)
 
-	for i, element := range legalMoves {
+	for _, element := range legalMoves {
 		tmpBoard := placePiece(board, element, turn)
+		
+		if turn == 1 {
+			turn = 2
+		} else {
+			turn = 1
+		}
+
+		// fmt.Printf("%d and %d\n", v, ab)
+		v = maximum(v, alphaBeta(tmpBoard, alpha, beta, depth - 1, turn, maxTurn))
+
+		if v >= beta {
+			return v
+		}
+
+		alpha = maximum(alpha, v)
 	}
 	
-	return 0
+	return v
 }
 
-func minScore(board[8][8] int, alpha int, beta int, depth int, color int) int{
-	return 0
+func minScore(board[8][8] int, alpha int, beta int, depth int, turn int, maxTurn int) int{
+	v := math.MaxInt
+	legalMoves := getAllLegalMoves(turn, board)
+
+	for _, element := range legalMoves {
+		tmpBoard := placePiece(board, element, turn)
+
+		if turn == 1 {
+			turn = 2
+		} else {
+			turn = 1
+		}
+
+		v = minimum(v, alphaBeta(tmpBoard, alpha, beta, depth - 1, turn, maxTurn))
+
+		if v <= alpha {
+			return v
+		}
+
+		beta = minimum(beta, v)
+	}
+	
+	return v
 }
 
 // given a board and a player, return a heuristic score for the player
 func calculateHeuristicScore(board [8][8] int, player int) int{
+	scoreBoard := [8][8]int{
+		{200, -10, 10, 10, 10, 10, -10, 200},
+		{-10, -10, -1, -1, -1, -1, -1, -10},
+		{10, -1, 1, 1, 1, 1, -1, 10},
+		{10, -1, 1, 1, 1, 1, -1, 10},
+		{10, -1, 1, 1, 1, 1, -1, 10},
+		{10, -1, 1, 1, 1, 1, -1, 10},
+		{-10, -10, -1, -1, -1, -1, -10, -10},
+		{200, -10, 10, 10, 10, 10, -10, 200}}
+	
 	score := 0
 	for i := 0; i < 8; i++ {
 		for j := 0; j < 8; j++ {
 			if board[i][j] == player {
-				score++
-			} 
+				score += scoreBoard[i][j]
+			}
 		}
 	}
+	// for i := 0; i < 8; i++ {
+	// 	for j := 0; j < 8; j++ {
+	// 		if board[i][j] == player {
+	// 			score++
+	// 		} 
+	// 	}
+	// }
 
-	if board[0][0] == player {
-		score += 100
-	}
+	// if board[0][0] == player {
+	// 	score += 100
+	// }
 
-	if board[0][7] == player {
-		score += 100
-	}
+	// if board[0][7] == player {
+	// 	score += 100
+	// }
 
-	if board[7][7] == player {
-		score += 100
-	}
+	// if board[7][7] == player {
+	// 	score += 100
+	// }
 
-	if board[7][0] == player {
-		score += 100
-	}
+	// if board[7][0] == player {
+	// 	score += 100
+	// }
 
-	for i := 0; i < 8; i++{
-		if board[i][0] == player {
-			score += 10
-		}
+	// for i := 0; i < 8; i++{
+	// 	if board[i][0] == player {
+	// 		score += 10
+	// 	}
 
-		if board[0][i] == player {
-			score += 10
-		}
+	// 	if board[0][i] == player {
+	// 		score += 10
+	// 	}
 
-		if board[i][7] == player {
-			score += 10
-		}
+	// 	if board[i][7] == player {
+	// 		score += 10
+	// 	}
 
-		if board[7][i] == player {
-			score += 10
-		}
-	}
+	// 	if board[7][i] == player {
+	// 		score += 10
+	// 	}
+	// }
 
 	return score
 }

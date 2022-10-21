@@ -11,7 +11,7 @@ func beginGame() (int, int, int, int){
 	gameOver = false
 	p1 := 0
 	p2 := 1
-	timeLimit := 5
+	timeLimit := 1
 	turn := 1
 
 	color.Set(color.FgWhite)
@@ -164,7 +164,7 @@ func checkWinner(board [8][8] int){
 		for j := 0; j < 8; j++ {
 			if board[i][j] == 1 {
 				p1Score++
-			} else {
+			} else if board[i][j] == 2{
 				p2Score++
 			}
 		}
