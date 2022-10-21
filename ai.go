@@ -9,26 +9,26 @@ import (
 func getAITurn(board[8][8] int, legalMoves []int, turn int, timeLimit int) int{
 	start := time.Now()
 
-	if len(legalMoves) == 1 { // if there is only one avaailable move
+	if len(legalMoves) == 1 { // if there is only one available move
 		return 0
 	}
 	
 	bestMove := 0
 	depth := 1
-
-	fmt.Printf("checking %d different turns\n", len(legalMoves))
+	completeDepth := true
+	// fmt.Printf("checking %d different turns\n", len(legalMoves))
 
 	for {
-		// fmt.Printf("depth: %d\n", depth)
-		if time.Since(start).Seconds() > float64(timeLimit) {
+		if float64(timeLimit) - time.Since(start).Seconds() < float64(timeLimit)/2.0 {
 			break
 		}
 
 		value := math.MinInt
+		bestMoveDepth := 0
 		// fmt.Printf("Depth: %d, found %d moves\n", depth, len(legalMoves))
 
 		for i, move := range legalMoves {
-			fmt.Printf("Placing move on board: %d\n", move)
+			// fmt.Printf("Placing move on board: %d\n", move)
 			tmpBoard := placePiece(board, move, turn)
 			tmpTurn := turn
 
@@ -39,17 +39,29 @@ func getAITurn(board[8][8] int, legalMoves []int, turn int, timeLimit int) int{
 			}
 
 			score := alphaBeta(tmpBoard, math.MinInt, math.MaxInt, depth, tmpTurn, turn)
-			fmt.Printf("Score: %d\n", score)
+			// fmt.Printf("Score: %d\n", score)
 
 			if score > value {
 				value = score
-				bestMove = i
+				bestMoveDepth = i
+			}
+
+			if time.Since(start).Seconds() > float64(timeLimit) {
+				completeDepth = false
+				break
 			}
 		}
 
+		if !completeDepth {
+			fmt.Printf("AI was interrupted at depth %d.\n", depth)
+			break
+		}
+
+		bestMove = bestMoveDepth
 		depth++
 	}
 
+	fmt.Printf("AI reached a depth of %d after %f seconds.\n", depth, time.Since(start).Seconds())
 	
 	return bestMove
 }
@@ -141,47 +153,6 @@ func calculateHeuristicScore(board [8][8] int, player int) int{
 			}
 		}
 	}
-	// for i := 0; i < 8; i++ {
-	// 	for j := 0; j < 8; j++ {
-	// 		if board[i][j] == player {
-	// 			score++
-	// 		} 
-	// 	}
-	// }
-
-	// if board[0][0] == player {
-	// 	score += 100
-	// }
-
-	// if board[0][7] == player {
-	// 	score += 100
-	// }
-
-	// if board[7][7] == player {
-	// 	score += 100
-	// }
-
-	// if board[7][0] == player {
-	// 	score += 100
-	// }
-
-	// for i := 0; i < 8; i++{
-	// 	if board[i][0] == player {
-	// 		score += 10
-	// 	}
-
-	// 	if board[0][i] == player {
-	// 		score += 10
-	// 	}
-
-	// 	if board[i][7] == player {
-	// 		score += 10
-	// 	}
-
-	// 	if board[7][i] == player {
-	// 		score += 10
-	// 	}
-	// }
 
 	return score
 }

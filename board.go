@@ -199,7 +199,7 @@ func isLegalMove(board [8][8] int, player int, row int, col int) bool{
 		}
 
 		if ne == opponent {
-			for d := 2; col + d <= 0 && row - d >= 0; d++ {
+			for d := 2; col + d <= 7 && row - d >= 0; d++ {
 				nextPiece := board[row - d][col + d]
 				if nextPiece == 0 {
 					break
