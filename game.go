@@ -113,7 +113,7 @@ func beginGame() (int, int, int, int){
 
 func gameLoop(p1 int, p2 int, turn int, timeLimit int){
 	board := initializeBoard()
-	noTurn := false
+	noTurn := 0
 
 	if loadpath != "" {
 		if loadpath == "autosave" {
@@ -133,15 +133,16 @@ func gameLoop(p1 int, p2 int, turn int, timeLimit int){
 		legalMoves := getAllLegalMoves(turn, board)
 
 		if len(legalMoves) > 0 {
+			noTurn = 0
 			playerMove := getPlayerDecision(board, legalMoves, turn, p1, p2, timeLimit)
 			fmt.Printf("\nPlayer %d placed a piece on %s.\n", turn, convertIntToCoords(legalMoves[playerMove]))
 			board = placePiece(board, legalMoves[playerMove], turn)
 		} else {
-			if noTurn {
+			noTurn++
+			if noTurn == 2 {
 				gameOver = true
 			} else {
 				fmt.Printf("\nPlayer %d has no moves.\n", turn)
-				noTurn = true
 			}
 		}
 
