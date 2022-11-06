@@ -62,28 +62,30 @@ func beginGame() (int, int, int, int){
 			color.Red("Please type an 'h' for human or an 'a' for AI.\n")
 		}
 
-		fmt.Println("What is the AI time limit (in seconds) for each turn?")
-		
-		for {
-			timeStr, err := reader.ReadString('\n')	
-			timeLimit, err = convertStringToInt(timeStr)
+		if loadpath == "" {
+			fmt.Println("What is the AI time limit (in seconds) for each turn?")
+			
+			for {
+				timeStr, err := reader.ReadString('\n')	
+				timeLimit, err = convertStringToInt(timeStr)
 
-			if err != nil {
-				color.Red("Please input a valid number.\n")
-			} else {
-				break
+				if err != nil {
+					color.Red("Please input a valid number.\n")
+				} else {
+					break
+				}
 			}
-		}
 
-		fmt.Println("Which player will make the first move?")
-		for {
-			turnStr, err := reader.ReadString('\n')	
-			turn, err = convertStringToInt(turnStr)
+			fmt.Println("Which player will make the first move?")
+			for {
+				turnStr, err := reader.ReadString('\n')	
+				turn, err = convertStringToInt(turnStr)
 
-			if err != nil || (turn != 1 && turn != 2 ){
-				color.Red("Please input a a 1 or 2.\n")
-			} else {
-				break
+				if err != nil || (turn != 1 && turn != 2 ){
+					color.Red("Please input a a 1 or 2.\n")
+				} else {
+					break
+				}
 			}
 		}
 	}
