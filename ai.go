@@ -37,7 +37,7 @@ func getAITurn(board[8][8] int, legalMoves []int, turn int, timeLimit int) int{
 			break out
 		}
 		for i, move := range legalMoves {
-			if float64(timeLimit) - time.Since(start).Seconds() < 0.25 {
+			if float64(timeLimit) - time.Since(start).Seconds() < 0.35 {
 				cutOff = true
 				break out
 			}
@@ -51,9 +51,12 @@ func getAITurn(board[8][8] int, legalMoves []int, turn int, timeLimit int) int{
 				tmpTurn = 1
 			}
 
-			score := minimax(tmpBoard, depth, math.MinInt, math.MaxInt, turn, tmpTurn, p)
-			scores[i] = score
-			depths[i] = depth
+			score, cutOff := minimax(tmpBoard, depth, math.MinInt, math.MaxInt, turn, tmpTurn, p, timeLimit, start)
+
+			if !cutOff {
+				scores[i] = score
+				depths[i] = depth
+			}
 		}
 
 		depth++
@@ -81,23 +84,29 @@ func getAITurn(board[8][8] int, legalMoves []int, turn int, timeLimit int) int{
 	return bestI
 }
 
-func minimax(board[8][8] int, depth int, a int, b int, maxTurn int, currentTurn int, previousMoves []int) (int){
-	alpha := a
-	beta := b
-
-	if depth == 0 {
-		score := calculateHeuristicScore(board, maxTurn)
-		return score
-	}
-
+func minimax(board[8][8] int, depth int, a int, b int, maxTurn int, currentTurn int, previousMoves []int, timeLimit int, start time.Time) (int, bool){
 	max := currentTurn
 	min := 1
 	if max == 1 {
 		min = 2
 	}
 
+	if float64(timeLimit) - time.Since(start).Seconds() < 0.1 {
+		return 0, true
+	}
+	
+	
+	alpha := a
+	beta := b
+
+	if depth == 0 {
+		score := calculateHeuristicScore(board, maxTurn)
+		return score, false
+	}
+
+	
+
 	if len(getAllLegalMoves(max, board)) == 0 && len(getAllLegalMoves(min, board)) == 0 {
-		
 		minScore := 0
 		maxScore := 0
 
@@ -112,12 +121,12 @@ func minimax(board[8][8] int, depth int, a int, b int, maxTurn int, currentTurn 
 		}
 
 		if maxScore > minScore {
-			return 100000
+			return 100000, false
 		} else if minScore > maxScore {
-			return -100000
+			return -100000, false
 		}
 
-		return 0
+		return 0, false
 	}
 
 	legalMoves := getAllLegalMoves(currentTurn, board)
@@ -140,7 +149,7 @@ func minimax(board[8][8] int, depth int, a int, b int, maxTurn int, currentTurn 
 				tmpTurn = 1
 			}
 
-			val := minimax(tmpBoard, depth - 1, alpha, beta, maxTurn, tmpTurn, tmpPreviousMoves)
+			val, _ := minimax(tmpBoard, depth - 1, alpha, beta, maxTurn, tmpTurn, tmpPreviousMoves, timeLimit, start)
 			maxVal = maximum(maxVal, val)
 			alpha = maximum(alpha, val)
 
@@ -148,7 +157,7 @@ func minimax(board[8][8] int, depth int, a int, b int, maxTurn int, currentTurn 
 				break
 			}
 		}
-		return maxVal
+		return maxVal, false
 	} else {
 		minVal := math.MaxInt
 
@@ -167,7 +176,7 @@ func minimax(board[8][8] int, depth int, a int, b int, maxTurn int, currentTurn 
 				tmpTurn = 1
 			}
 
-			val := minimax(tmpBoard, depth - 1, alpha, beta, maxTurn, tmpTurn, tmpPreviousMoves)
+			val, _ := minimax(tmpBoard, depth - 1, alpha, beta, maxTurn, tmpTurn, tmpPreviousMoves, timeLimit, start)
 			minVal = minimum(minVal, val)
 			beta = minimum(beta, val)
 
@@ -175,7 +184,7 @@ func minimax(board[8][8] int, depth int, a int, b int, maxTurn int, currentTurn 
 				break
 			}
 		}
-		return minVal
+		return minVal, false
 	}
 }
 
@@ -186,7 +195,17 @@ func calculateHeuristicScore(board [8][8] int, player int) int{
 
 	if max == 1 {
 		min = 2
-	} 
+	}
+
+	scoreBoard := [8][8]int{
+		{10, -5, 5, 5, 5, 5, -5, 10},
+		{-5, -7, -1, -1, -1, -1, -7, -5},
+		{5, -1, 10, 1, 1, 10, -1, 5},
+		{5, -1, 1, 5, 5, 1, -1, 5},
+		{5, -1, 1, 5, 5, 1, -1, 5},
+		{5, -1, 10, 1, 1, 10, -1, 5},
+		{-5, -7, -1, -1, -1, -1, -7, -5},
+		{10, -5, 5, 5, 5, 5, -5, 10}}
 	
 	empties := 0
 	maxCorners := 0
